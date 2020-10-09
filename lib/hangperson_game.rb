@@ -4,25 +4,13 @@ class HangpersonGame
   # to make the tests in spec/hangperson_game_spec.rb pass.
 
   # Get a word from remote "random word" service
-  
-  def initialize(new_word)
-    @word = new_word
+  attr_accessor :word, :guesses, :wrong_guesses
+  def initialize(word)
+    @word = word
     @guesses = ''
     @wrong_guesses = ''
   end
-  
-  def word
-    @word = word
-  end
 
-  def guesses
-    @guesses
-  end
-
-  def wrong_guesses
-    @wrong_guesses
-  end
-  
 
   def guess(char)
     if char.nil? or /[^A-Za-z]/.match(char) !=nil or char ==''
@@ -33,29 +21,35 @@ class HangpersonGame
     end
 
     if @word.include? char
-      @guesses = @guesses+char
-      return true
+      @guesses << char
+
+    else
+      @wrong_guesses << char
     end
-  else
-    @wrong_guesses = @wrong_guesses + char
-    return true
+      return true
   end
 
   def word_with_guesses
-    @word.gsub(/[^ #{@guesses}]/,'-')
+    result = ''
+    @word.split('').each do |char|
+      if @guesses.include? char
+        result << char
+      else
+        result << '-'
+      end
   end
+  return result
+end
 
   def check_win_or_lose
-    if @wrong_guesses.length >= 7
-      return :lose
-    end
-    if word_with_guesses == @word
+    if word_with_guesses.downcase == @word.downcase
       return :win
-      end
-    :play
+    elsif @wrong_guesses.length >= 7
+      return :lose
+    else
+      return :play
+    end
   end
-
-
 
   # You can test it by running $ bundle exec irb -I. -r app.rb
   # And then in the irb: irb(main):001:0> HangpersonGame.get_random_word
@@ -68,5 +62,4 @@ class HangpersonGame
       return http.post(uri, "").body
     }
   end
-
 end
